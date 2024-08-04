@@ -14,10 +14,14 @@ def get_next_friday(start_date):
 st.title("Ticket Priority Report Generator")
 
 # File uploader
-uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
+uploaded_file = st.file_uploader("Choose an Excel file", type=["xls", "xlsx"])
 
 if uploaded_file:
-    df = pd.read_excel(uploaded_file)
+    # Load the Excel file based on the extension
+    if uploaded_file.name.endswith('.xls'):
+        df = pd.read_excel(uploaded_file, engine='xlrd')
+    else:
+        df = pd.read_excel(uploaded_file)
 
     # Convert date columns to datetime
     df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'], format='%d %b %Y %I:%M %p')
