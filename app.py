@@ -7,7 +7,7 @@ def get_next_friday(start_date):
     days_ahead = 4 - start_date.weekday()  # Friday is the 4th day of the week
     if days_ahead <= 0:
         days_ahead += 7
-    return start_date + timedelta(days=days_ahead)
+    return start_date + timedelta(days_ahead)
 
 # Function to get the Friday date of the week for the given date
 def get_friday_of_week(date):
@@ -155,7 +155,7 @@ def generate_weekly_report(df, report_start_date, report_end_date):
         elif priority == 'P3':
             report_df.loc[(report_df['Teams'] == 'Alerts') & (report_df['Priority'] == priority), ['Not an Issue', 'Closed Tickets', 'Expected TAT']] = [0, 0, 7]
         elif priority == 'P4':
-            report_df.loc[(report_df['Teams'] == 'Alerts') & (report_df['Priority'] == priority), ['Not an Issue', 'Closed Tickets', 'Expected TAT']] = [16, 0, 30]
+            report_df.loc[(report_df['Teams'] == 'Alerts') & (report_df['Priority'] == priority), ['Not an Issue', 'Closed Tickets', 'Expected TAT']] = [39, 39, 30]
 
     # Return the report DataFrame
     return report_df
@@ -177,7 +177,7 @@ if uploaded_file:
     df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'], format='%d %b %Y %I:%M %p')
     df['Ticket Closed Time'] = pd.to_datetime(df['Ticket Closed Time'], format='%d %b %Y %I:%M %p', errors='coerce')
 
-    # Option to select report type
+    # Report type selection
     report_type = st.selectbox("Select Report Type", ["First Report", "Weekly Report"])
 
     if report_type == "First Report":
