@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
-import io
 
 # Function to get the next Friday from a given date
 def get_next_friday(start_date):
@@ -119,7 +118,7 @@ def generate_weekly_report(df, report_start_date, report_end_date):
 
             reports[team][priority]['Not an Issue'] = not_an_issue_count
 
-            # Count Closed Tickets
+            # Count Closed Tickets (including "closed" and "duplicate" statuses)
             closed_tickets_count = len(filtered_df[filtered_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])])
             reports[team][priority]['Closed Tickets'] = closed_tickets_count
 
