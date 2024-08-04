@@ -167,12 +167,12 @@ def generate_weekly_report(df, report_start_date, report_end_date):
 # Title of the app
 st.title("Ticket Priority Report Generator")
 
-# File uploader
-uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+# File uploader for Excel files
+uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
 if uploaded_file:
-    # Read data from uploaded file
-    df = pd.read_csv(uploaded_file)
+    # Read data from uploaded Excel file
+    df = pd.read_excel(uploaded_file)
 
     # Convert dates to datetime
     df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'])
