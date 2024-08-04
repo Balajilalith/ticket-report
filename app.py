@@ -178,7 +178,7 @@ if uploaded_file:
         df = pd.read_excel(uploaded_file)  # For .xlsx files
 
     # Convert dates to datetime
-    df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'], format='%d %b %Y %I:%M %p')
+    df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'], format='%d %b %Y %I:%M %p', errors='coerce')
     df['Ticket Closed Time'] = pd.to_datetime(df['Ticket Closed Time'], format='%d %b %Y %I:%M %p', errors='coerce')
 
     # Report type selection
