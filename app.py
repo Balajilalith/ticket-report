@@ -110,11 +110,15 @@ def generate_weekly_report(df, report_start_date, report_end_date):
             else:
                 filtered_df = df[df['Priority (Ticket)'].str.contains(priority, case=False)]
 
-            # Count Not an Issue (Query and Access Request)
-            not_an_issue_count = len(filtered_df[filtered_df['Category (Ticket)'].str.lower().isin(['query', 'access request'])])
+            # Count Not an Issue (Query and Access Request) for Alerts team
+            if team == 'Alerts':
+                not_an_issue_count = len(filtered_df[filtered_df['Category (Ticket)'].str.lower().isin(['query', 'access request'])])
+            else:
+                not_an_issue_count = 0
+
             reports[team][priority]['Not an Issue'] = not_an_issue_count
 
-            # Count Closed Tickets (including 'duplicate')
+            # Count Closed Tickets
             closed_tickets_count = len(filtered_df[filtered_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])])
             reports[team][priority]['Closed Tickets'] = closed_tickets_count
 
@@ -164,40 +168,19 @@ def generate_weekly_report(df, report_start_date, report_end_date):
 st.title("Ticket Priority Report Generator")
 
 # File uploader
-uploaded_file = st.file_uploader("Choose an Excel file", type=["xls", "xlsx"])
+uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file:
-    # Load the Excel file based on the extension
-    if uploaded_file.name.endswith('.xls'):
-        df = pd.read_excel(uploaded_file, engine='xlrd')
-    else:
-        df = pd.read_excel(uploaded_file)
+    # Read data from uploaded file
+    df = pd.read_csv(uploaded_file)
 
-    # Convert date columns to datetime
-    df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'], format='%d %b %Y %I:%M %p')
-    df['Ticket Closed Time'] = pd.to_datetime(df['Ticket Closed Time'], format='%d %b %Y %I:%M %p', errors='coerce')
+    # Convert dates to datetime
+    df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'])
+    df['Ticket Closed Time'] = pd.to_datetime(df['Ticket Closed Time'])
 
-    # Report type selection
-    report_type = st.selectbox("Select Report Type", ["First Report", "Weekly Report"])
+    # Generate weekly report
+    start_date = st.date_input("Start Date", value=datetime.now() - timedelta(days=7))
+    end_date = st.date_input("End Date", value=datetime.now())
 
-    if report_type == "First Report":
-        # Generate the first report
-        report_df = generate_first_report(df)
-    elif report_type == "Weekly Report":
-        # Input for the report period
-        report_start_date = st.date_input("Report Start Date", datetime.now() - timedelta(days=30))
-        report_end_date = st.date_input("Report End Date", datetime.now())
-
-        # Generate the weekly report
-        report_df = generate_weekly_report(df, report_start_date, report_end_date)
-
-    # Display the report
-    st.write(report_df)
-
-    # Download the report as a CSV file
-    st.download_button(
-        label="Download Report",
-        data=report_df.to_csv(index=False),
-        file_name="report.csv",
-        mime="text/csv"
-    )
+    report = generate_weekly_report(df, start_date, end_date)
+    st.write(report)
