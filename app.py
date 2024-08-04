@@ -114,8 +114,8 @@ def generate_weekly_report(df, report_start_date, report_end_date):
             not_an_issue_count = len(filtered_df[filtered_df['Category (Ticket)'].str.lower().isin(['query', 'access request'])])
             reports[team][priority]['Not an Issue'] = not_an_issue_count
 
-            # Count Closed Tickets
-            closed_tickets_count = len(filtered_df[filtered_df['Status (Ticket)'].str.lower() == 'closed'])
+            # Count Closed Tickets (including 'duplicate')
+            closed_tickets_count = len(filtered_df[filtered_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])])
             reports[team][priority]['Closed Tickets'] = closed_tickets_count
 
             # Calculate Actual TAT in days
@@ -184,9 +184,9 @@ if uploaded_file:
         # Generate the first report
         report_df = generate_first_report(df)
     elif report_type == "Weekly Report":
-        # Report week start and end dates input
-        report_start_date = st.date_input("Report Start Date", value=datetime(2024, 7, 20))
-        report_end_date = st.date_input("Report End Date", value=datetime(2024, 7, 26))
+        # Input for the report period
+        report_start_date = st.date_input("Report Start Date", datetime.now() - timedelta(days=30))
+        report_end_date = st.date_input("Report End Date", datetime.now())
 
         # Generate the weekly report
         report_df = generate_weekly_report(df, report_start_date, report_end_date)
@@ -194,10 +194,10 @@ if uploaded_file:
     # Display the report
     st.write(report_df)
 
-    # Download button for the report
+    # Download the report as a CSV file
     st.download_button(
         label="Download Report",
-        data=report_df.to_csv(index=False).encode('utf-8'),
-        file_name='report.csv',
-        mime='text/csv',
+        data=report_df.to_csv(index=False),
+        file_name="report.csv",
+        mime="text/csv"
     )
