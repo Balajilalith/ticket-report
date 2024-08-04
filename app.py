@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
-import numpy as np
 
-# Function to find the next Friday from a given date
+# Function to get the next Friday from a given date
 def get_next_friday(start_date):
     days_ahead = 4 - start_date.weekday()  # Friday is the 4th day of the week
     if days_ahead <= 0:
