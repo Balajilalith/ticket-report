@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
+import io
 
 # Function to get the next Friday from a given date
 def get_next_friday(start_date):
@@ -168,19 +169,40 @@ def generate_weekly_report(df, report_start_date, report_end_date):
 st.title("Ticket Priority Report Generator")
 
 # File uploader for Excel files
-uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
+uploaded_file = st.file_uploader("Choose an Excel file", type=["xls", "xlsx"])
 
 if uploaded_file:
-    # Read data from uploaded Excel file
-    df = pd.read_excel(uploaded_file)
+    # Load the Excel file based on the extension
+    if uploaded_file.name.endswith('.xls'):
+        df = pd.read_excel(uploaded_file, engine='xlrd')  # For .xls files
+    else:
+        df = pd.read_excel(uploaded_file)  # For .xlsx files
 
     # Convert dates to datetime
-    df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'])
-    df['Ticket Closed Time'] = pd.to_datetime(df['Ticket Closed Time'])
+    df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'], format='%d %b %Y %I:%M %p')
+    df['Ticket Closed Time'] = pd.to_datetime(df['Ticket Closed Time'], format='%d %b %Y %I:%M %p', errors='coerce')
 
-    # Generate weekly report
-    start_date = st.date_input("Start Date", value=datetime.now() - timedelta(days=7))
-    end_date = st.date_input("End Date", value=datetime.now())
+    # Report type selection
+    report_type = st.selectbox("Select Report Type", ["First Report", "Weekly Report"])
 
-    report = generate_weekly_report(df, start_date, end_date)
-    st.write(report)
+    if report_type == "First Report":
+        # Generate the first report
+        report_df = generate_first_report(df)
+    elif report_type == "Weekly Report":
+        # Report week start and end dates input
+        start_date = st.date_input("Start Date", value=datetime.now() - timedelta(days=7))
+        end_date = st.date_input("End Date", value=datetime.now())
+
+        # Generate the weekly report
+        report_df = generate_weekly_report(df, start_date, end_date)
+
+    # Display the report
+    st.write(report_df)
+
+    # Download button for the report
+    st.download_button(
+        label="Download Report",
+        data=report_df.to_csv(index=False).encode('utf-8'),
+        file_name='report.csv',
+        mime='text/csv',
+    )
