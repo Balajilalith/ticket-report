@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime, timedelta
 import streamlit as st
+import io
 
 # Function to calculate the next Friday from a given date
 def get_next_friday(start_date):
@@ -95,6 +96,18 @@ if uploaded_file is not None:
     # Display the final report
     st.write(summary_report_df)
 
+    # Provide download link for the summary report
+    summary_excel = io.BytesIO()
+    with pd.ExcelWriter(summary_excel, engine='xlsxwriter') as writer:
+        summary_report_df.to_excel(writer, index=False)
+    summary_excel.seek(0)
+    st.download_button(
+        label="Download Summary Report as Excel",
+        data=summary_excel,
+        file_name='summary_report.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
     # Report 2: Detailed Report
     st.header("Detailed Report")
 
@@ -135,16 +148,14 @@ if uploaded_file is not None:
     # Display the detailed report
     st.write(detailed_report_df)
 
-    # Provide download link for the summary report
-    st.download_button(
-        label="Download Summary Report as Excel",
-        data=summary_report_df.to_excel(index=False),
-        file_name='summary_report.xlsx'
-    )
-
     # Provide download link for the detailed report
+    detailed_excel = io.BytesIO()
+    with pd.ExcelWriter(detailed_excel, engine='xlsxwriter') as writer:
+        detailed_report_df.to_excel(writer, index=False)
+    detailed_excel.seek(0)
     st.download_button(
         label="Download Detailed Report as Excel",
-        data=detailed_report_df.to_excel(index=False),
-        file_name='detailed_report.xlsx'
+        data=detailed_excel,
+        file_name='detailed_report.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
