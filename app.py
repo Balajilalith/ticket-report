@@ -1,22 +1,27 @@
 import pandas as pd
 from datetime import datetime, timedelta
 import streamlit as st
-import numpy as np
 
 # Function to calculate the next Friday from a given date
 def get_next_friday(start_date):
     days_ahead = 4 - start_date.weekday()  # Friday is the 4th day of the week
     if days_ahead <= 0:
         days_ahead += 7
-    return start_date + timedelta(days=days_ahead)
+    return start_date + timedelta(days_ahead)
 
 # Streamlit app
 st.title("Ticket Report Generator")
 
-uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
+uploaded_file = st.file_uploader("Choose an Excel or CSV file", type=["xlsx", "xls", "csv"])
 
 if uploaded_file is not None:
-    df = pd.read_excel(uploaded_file)
+    file_extension = uploaded_file.name.split('.')[-1]
+
+    # Read the file based on its extension
+    if file_extension == 'xlsx' or file_extension == 'xls':
+        df = pd.read_excel(uploaded_file)
+    elif file_extension == 'csv':
+        df = pd.read_csv(uploaded_file)
 
     # Convert date columns to datetime
     df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'], format='%d %b %Y %I:%M %p')
