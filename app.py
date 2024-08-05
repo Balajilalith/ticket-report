@@ -170,3 +170,16 @@ if uploaded_file is not None:
         file_name="alerts_report.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+    # Complete Report for reference
+    st.header("Complete Report for Reference")
+    complete_excel = io.BytesIO()
+    with pd.ExcelWriter(complete_excel, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False)
+    complete_excel.seek(0)
+    st.download_button(
+        label="Download Complete Report",
+        data=complete_excel,
+        file_name="complete_report.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
