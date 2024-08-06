@@ -4,7 +4,6 @@ import numpy as np
 import io
 from datetime import datetime, timedelta
 import plotly.express as px
-from google.colab import files
 
 # Function to process uploaded file and generate reports
 def process_file(uploaded_file):
