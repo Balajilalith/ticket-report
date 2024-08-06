@@ -4,3 +4,4 @@ numpy
 xlrd
 openpyxl
 xlsxwriter
+plotly
