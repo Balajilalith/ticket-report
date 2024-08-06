@@ -112,7 +112,7 @@ def process_file(uploaded_file):
 
     alerts_report_df = pd.DataFrame(alerts_report_data)
 
-    return summary_report_df, detailed_summary_report_df, alerts_report_df
+    return summary_report_df, detailed_summary_report_df, alerts_report_df, df
 
 # Streamlit UI
 st.title('Ticket Report Generation')
@@ -120,7 +120,7 @@ st.title('Ticket Report Generation')
 uploaded_file = st.file_uploader("Upload your file (CSV, XLSX, XLS)", type=['csv', 'xlsx', 'xls'])
 
 if uploaded_file:
-    summary_report_df, detailed_summary_report_df, alerts_report_df = process_file(uploaded_file)
+    summary_report_df, detailed_summary_report_df, alerts_report_df, df = process_file(uploaded_file)
 
     # Display summary report
     st.header('Summary Report')
