@@ -2,6 +2,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 import streamlit as st
 import io
+import matplotlib.pyplot as plt
+import plotly.express as px
 
 # Helper functions
 def get_next_friday(start_date):
@@ -170,3 +172,18 @@ if uploaded_file is not None:
         file_name="alerts_report.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+    # Graphs
+    st.header("Graphs")
+
+    # Summary Report Graph
+    fig_summary = px.bar(summary_report_df, x='Priority', y='Closed Tickets', title='Closed Tickets by Priority')
+    st.plotly_chart(fig_summary)
+
+    # Detailed Report Graph
+    fig_detailed = px.bar(detailed_report_df, x='Ticket Priority', y='Tickets Closed', title='Tickets Closed by Priority')
+    st.plotly_chart(fig_detailed)
+
+    # Alerts Report Graph
+    fig_alerts = px.bar(alerts_report_df, x='Priority', y='Closed Tickets', title='Closed Tickets by Priority (ElastAlert)')
+    st.plotly_chart(fig_alerts)
