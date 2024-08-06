@@ -14,9 +14,17 @@ def process_file(uploaded_file):
     else:
         df = pd.read_excel(uploaded_file)
 
+    # Check if required columns exist
+    required_columns = ['Created Time (Ticket)', 'Ticket Closed Time (Ticket)', 'Priority (Ticket)', 
+                        'Category (Ticket)', 'Status (Ticket)', 'Subject']
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        st.error(f"The following required columns are missing from the uploaded file: {', '.join(missing_columns)}")
+        return None, None, None, None
+
     # Convert date columns to datetime
     df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'], format='%d %b %Y %I:%M %p')
-    df['Ticket Closed Time'] = pd.to_datetime(df['Ticket Closed Time (Ticket)'], format='%d %b %Y %I:%M %p', errors='coerce')
+    df['Ticket Closed Time (Ticket)'] = pd.to_datetime(df['Ticket Closed Time (Ticket)'], format='%d %b %Y %I:%M %p', errors='coerce')
 
     # Define the teams
     teams = ['kiCredit', 'Alerts']
@@ -121,84 +129,85 @@ uploaded_file = st.file_uploader("Upload your file (CSV, XLSX, XLS)", type=['csv
 
 if uploaded_file:
     summary_report_df, detailed_summary_report_df, alerts_report_df, df = process_file(uploaded_file)
-
-    # Display summary report
-    st.header('Summary Report')
-    st.dataframe(summary_report_df)
-
-    # Display detailed summary report
-    st.header('Detailed Summary Report')
-    st.dataframe(detailed_summary_report_df)
-
-    # Display alerts report
-    st.header('Alerts Report')
-    st.dataframe(alerts_report_df)
-
-    # Generate and display graphs
-    st.header('Graphs')
-
-    # Summary Report Graph
-    summary_fig = px.bar(summary_report_df, x='Teams', y=['Not an Issue', 'Closed Tickets'],
-                         color='Priority', barmode='group', title='Summary Report')
-    st.plotly_chart(summary_fig)
-
-    # Detailed Summary Report Graph
-    detailed_summary_fig = px.bar(detailed_summary_report_df, x='Teams', y=['Not an Issue', 'Closed Tickets'],
-                                  color='Priority', barmode='group', title='Detailed Summary Report')
-    st.plotly_chart(detailed_summary_fig)
-
-    # Alerts Report Graph
-    alerts_fig = px.bar(alerts_report_df, x='Priority', y=['Tickets raised', 'Not an Issue', 'Bugs', 'Tickets Closed'],
-                        barmode='group', title='Alerts Report')
-    st.plotly_chart(alerts_fig)
-
-    # Provide download links for the reports
-    st.header('Download Reports')
-
-    # Summary Report
-    summary_excel = io.BytesIO()
-    with pd.ExcelWriter(summary_excel, engine='xlsxwriter') as writer:
-        summary_report_df.to_excel(writer, index=False)
-    summary_excel.seek(0)
-    st.download_button(
-        label="Download Summary Report",
-        data=summary_excel,
-        file_name="summary_report.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-    # Detailed Summary Report
-    detailed_summary_excel = io.BytesIO()
-    with pd.ExcelWriter(detailed_summary_excel, engine='xlsxwriter') as writer:
-        detailed_summary_report_df.to_excel(writer, index=False)
-    detailed_summary_excel.seek(0)
-    st.download_button(
-        label="Download Detailed Summary Report",
-        data=detailed_summary_excel,
-        file_name="detailed_summary_report.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-    # Alerts Report
-    alerts_excel = io.BytesIO()
-    with pd.ExcelWriter(alerts_excel, engine='xlsxwriter') as writer:
-        alerts_report_df.to_excel(writer, index=False)
-    alerts_excel.seek(0)
-    st.download_button(
-        label="Download Alerts Report",
-        data=alerts_excel,
-        file_name="alerts_report.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
     
-    # Original Data Report
-    original_data_excel = io.BytesIO()
-    with pd.ExcelWriter(original_data_excel, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False)
-    original_data_excel.seek(0)
-    st.download_button(
-        label="Download Original Data Report",
-        data=original_data_excel,
-        file_name="original_data_report.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    if summary_report_df is not None:
+        # Display summary report
+        st.header('Summary Report')
+        st.dataframe(summary_report_df)
+
+        # Display detailed summary report
+        st.header('Detailed Summary Report')
+        st.dataframe(detailed_summary_report_df)
+
+        # Display alerts report
+        st.header('Alerts Report')
+        st.dataframe(alerts_report_df)
+
+        # Generate and display graphs
+        st.header('Graphs')
+
+        # Summary Report Graph
+        summary_fig = px.bar(summary_report_df, x='Teams', y=['Not an Issue', 'Closed Tickets'],
+                             color='Priority', barmode='group', title='Summary Report')
+        st.plotly_chart(summary_fig)
+
+        # Detailed Summary Report Graph
+        detailed_summary_fig = px.bar(detailed_summary_report_df, x='Teams', y=['Not an Issue', 'Closed Tickets'],
+                                      color='Priority', barmode='group', title='Detailed Summary Report')
+        st.plotly_chart(detailed_summary_fig)
+
+        # Alerts Report Graph
+        alerts_fig = px.bar(alerts_report_df, x='Priority', y=['Tickets raised', 'Not an Issue', 'Bugs', 'Tickets Closed'],
+                            barmode='group', title='Alerts Report')
+        st.plotly_chart(alerts_fig)
+
+        # Provide download links for the reports
+        st.header('Download Reports')
+
+        # Summary Report
+        summary_excel = io.BytesIO()
+        with pd.ExcelWriter(summary_excel, engine='xlsxwriter') as writer:
+            summary_report_df.to_excel(writer, index=False)
+        summary_excel.seek(0)
+        st.download_button(
+            label="Download Summary Report",
+            data=summary_excel,
+            file_name="summary_report.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+        # Detailed Summary Report
+        detailed_summary_excel = io.BytesIO()
+        with pd.ExcelWriter(detailed_summary_excel, engine='xlsxwriter') as writer:
+            detailed_summary_report_df.to_excel(writer, index=False)
+        detailed_summary_excel.seek(0)
+        st.download_button(
+            label="Download Detailed Summary Report",
+            data=detailed_summary_excel,
+            file_name="detailed_summary_report.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+        # Alerts Report
+        alerts_excel = io.BytesIO()
+        with pd.ExcelWriter(alerts_excel, engine='xlsxwriter') as writer:
+            alerts_report_df.to_excel(writer, index=False)
+        alerts_excel.seek(0)
+        st.download_button(
+            label="Download Alerts Report",
+            data=alerts_excel,
+            file_name="alerts_report.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+        # Original Data Report
+        original_data_excel = io.BytesIO()
+        with pd.ExcelWriter(original_data_excel, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False)
+        original_data_excel.seek(0)
+        st.download_button(
+            label="Download Original Data Report",
+            data=original_data_excel,
+            file_name="original_data_report.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
