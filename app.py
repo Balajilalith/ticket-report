@@ -38,7 +38,7 @@ if uploaded_file is not None:
 
     # Date conversion
     df['Created Time (Ticket)'] = pd.to_datetime(df['Created Time (Ticket)'], format='%d %b %Y %I:%M %p')
-    df['Ticket Closed Time'] = pd.to_datetime(df['Ticket Closed Time'], format='%d %b %Y %I:%M %p', errors='coerce')
+    df['Ticket Closed Time'] = pd.to_datetime(df['Ticket Closed Time (Ticket)'], format='%d %b %Y %I:%M %p', errors='coerce')
 
     # Exclude 'ElastAlert' tickets
     df_non_elastalert = df[~df['Subject'].str.contains("ElastAlert", case=False)]
