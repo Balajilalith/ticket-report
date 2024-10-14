@@ -27,8 +27,12 @@ uploaded_file = st.file_uploader("Choose an Excel or CSV file", type=["xlsx", "x
 # File reading
 if uploaded_file is not None:
     file_extension = uploaded_file.name.split('.')[-1]
-    if file_extension == 'xlsx' or file_extension == 'xls':
-        df = pd.read_excel(uploaded_file)
+    if file_extension == 'xlsx':
+        # Use openpyxl for .xlsx files
+        df = pd.read_excel(uploaded_file, engine='openpyxl')
+    elif file_extension == 'xls':
+        # Use xlrd for .xls files
+        df = pd.read_excel(uploaded_file, engine='xlrd')
     elif file_extension == 'csv':
         df = pd.read_csv(uploaded_file)
 
@@ -50,14 +54,14 @@ if uploaded_file is not None:
         not_an_issue_df = priority_df[priority_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])]
         not_an_issue = len(not_an_issue_df[not_an_issue_df['Category (Ticket)'].str.lower().isin(['query', 'access request'])])
         closed_tickets_count = len(priority_df[priority_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])])
-        
+
         if closed_tickets_count > 0:
             closed_tickets_df = priority_df[priority_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])]
             closed_tickets_df['TAT'] = (closed_tickets_df['Ticket Closed Time'] - closed_tickets_df['Created Time (Ticket)']).dt.days + 1
             actual_tat = closed_tickets_df['TAT'].mean()
         else:
             actual_tat = 'NA'
-        
+
         summary_report_data.append({
             'Priority': priority,
             'Not an Issue': not_an_issue,
@@ -65,7 +69,7 @@ if uploaded_file is not None:
             'Expected TAT': expected_tat[priority],
             'Actual TAT': round(actual_tat, 2) if actual_tat != 'NA' else actual_tat
         })
-    
+
     summary_report_df = pd.DataFrame(summary_report_data)
     st.dataframe(summary_report_df)
 
@@ -91,7 +95,7 @@ if uploaded_file is not None:
         not_an_issue = len(not_an_issue_df)
         bugs = len(priority_df[priority_df['Category (Ticket)'].str.lower() == 'bug'])
         closed_tickets_count = len(priority_df[priority_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])])
-        
+
         if closed_tickets_count > 0:
             closed_tickets_df = priority_df[priority_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])]
             closed_tickets_df['TAT'] = (closed_tickets_df['Ticket Closed Time'] - closed_tickets_df['Created Time (Ticket)']).dt.days + 1
@@ -105,7 +109,7 @@ if uploaded_file is not None:
             pending_tickets_df['Target ETA'] = pending_tickets_df['Created Time (Ticket)'].apply(get_next_friday)
         else:
             pending_tickets_df = None
-        
+
         detailed_report_data.append({
             'Ticket Priority': priority,
             'Tickets raised': tickets_raised,
@@ -117,7 +121,7 @@ if uploaded_file is not None:
             'Pending Tickets': pending_tickets_count,
             'Target ETA': pending_tickets_df['Target ETA'].max().strftime('%d %b %Y') if pending_tickets_df is not None else 'NA'
         })
-    
+
     detailed_report_df = pd.DataFrame(detailed_report_data)
     st.dataframe(detailed_report_df)
 
@@ -142,14 +146,14 @@ if uploaded_file is not None:
         not_an_issue_df = priority_df[priority_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])]
         not_an_issue = len(not_an_issue_df[not_an_issue_df['Category (Ticket)'].str.lower().isin(['query', 'access request'])])
         closed_tickets_count = len(priority_df[priority_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])])
-        
+
         if closed_tickets_count > 0:
             closed_tickets_df = priority_df[priority_df['Status (Ticket)'].str.lower().isin(['closed', 'duplicate'])]
             closed_tickets_df['TAT'] = (closed_tickets_df['Ticket Closed Time'] - closed_tickets_df['Created Time (Ticket)']).dt.days + 1
             actual_tat = closed_tickets_df['TAT'].mean()
         else:
             actual_tat = 'NA'
-        
+
         alerts_report_data.append({
             'Priority': priority,
             'Not an Issue': not_an_issue,
@@ -157,7 +161,7 @@ if uploaded_file is not None:
             'Expected TAT': expected_tat[priority],
             'Actual TAT': round(actual_tat, 2) if actual_tat != 'NA' else actual_tat
         })
-    
+
     alerts_report_df = pd.DataFrame(alerts_report_data)
     st.dataframe(alerts_report_df)
 
@@ -176,14 +180,4 @@ if uploaded_file is not None:
     # Graphs
     st.header("Graphs")
 
-    # Summary Report Graph
-    fig_summary = px.bar(summary_report_df, x='Priority', y='Closed Tickets', title='Closed Tickets by Priority')
-    st.plotly_chart(fig_summary)
-
-    # Detailed Report Graph
-    fig_detailed = px.bar(detailed_report_df, x='Ticket Priority', y='Tickets Closed', title='Tickets Closed by Priority')
-    st.plotly_chart(fig_detailed)
-
-    # Alerts Report Graph
-    fig_alerts = px.bar(alerts_report_df, x='Priority', y='Closed Tickets', title='Closed Tickets by Priority (ElastAlert)')
-    st.plotly_chart(fig_alerts)
+    #
